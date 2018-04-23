@@ -232,7 +232,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/21/hello/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/23/leveldb-skiplist/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="pifuant">
@@ -251,7 +251,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/04/21/hello/" itemprop="url">hello</a></h1>
+                <a class="post-title-link" href="/2018/04/23/leveldb-skiplist/" itemprop="url">leveldb skiplist</a></h1>
         
 
         <div class="post-meta">
@@ -263,8 +263,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-21T05:25:13+08:00">
-                2018-04-21
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-23T16:53:22+08:00">
+                2018-04-23
               </time>
             
 
@@ -303,7 +303,17 @@
       
         
           
-            
+            <h2 id="data-structure"><a href="#data-structure" class="headerlink" title="data structure"></a>data structure</h2><p><img src="/images/skiplist.png" alt="skiplist"></p>
+<p>leveldb memtable需要满足以下几种要求：</p>
+<ul>
+<li>get 足够快  </li>
+<li>write 足够快</li>
+<li>iterator 足够快 (compact to sst file by ordering)</li>
+</ul>
+<p>那么skiplist作为一个同时兼顾list和tree属性的data structure， 是非常好的选择。</p>
+<h2 id="concurrency"><a href="#concurrency" class="headerlink" title="concurrency"></a>concurrency</h2><p><img src="/images/lock.png" alt="concurrency"></p>
+<p>leveldb skiplist 通过采用write lock和memory barrior的方式， 保证读读， 读写操作不会冲突， 提高并发能力。</p>
+
           
         
       
@@ -396,6 +406,15 @@
 
             
 
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
             
 
           </nav>

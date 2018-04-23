@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="leveldb," />
 
 
 
@@ -79,17 +79,21 @@
 
 
 
-<meta name="description" content="蚍蜉撼大树 可笑不自量">
+<meta name="description" content="data structure leveldb memtable需要满足以下几种要求：  get 足够快   write 足够快 iterator 足够快 (compact to sst file by ordering)  那么skiplist作为一个同时兼顾list和tree属性的data structure， 是非常好的选择。 concurrency leveldb skiplist 通过采用">
+<meta name="keywords" content="leveldb">
 <meta property="og:type" content="article">
-<meta property="og:title" content="hello">
-<meta property="og:url" content="http://yoursite.com/2018/04/21/hello/index.html">
+<meta property="og:title" content="leveldb skiplist">
+<meta property="og:url" content="http://yoursite.com/2018/04/23/leveldb-skiplist/index.html">
 <meta property="og:site_name" content="Pifuant&#39;s Blog">
-<meta property="og:description" content="蚍蜉撼大树 可笑不自量">
+<meta property="og:description" content="data structure leveldb memtable需要满足以下几种要求：  get 足够快   write 足够快 iterator 足够快 (compact to sst file by ordering)  那么skiplist作为一个同时兼顾list和tree属性的data structure， 是非常好的选择。 concurrency leveldb skiplist 通过采用">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-20T21:25:13.655Z">
+<meta property="og:image" content="http://yoursite.com/images/skiplist.png">
+<meta property="og:image" content="http://yoursite.com/images/lock.png">
+<meta property="og:updated_time" content="2018-04-23T09:41:46.743Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="hello">
-<meta name="twitter:description" content="蚍蜉撼大树 可笑不自量">
+<meta name="twitter:title" content="leveldb skiplist">
+<meta name="twitter:description" content="data structure leveldb memtable需要满足以下几种要求：  get 足够快   write 足够快 iterator 足够快 (compact to sst file by ordering)  那么skiplist作为一个同时兼顾list和tree属性的data structure， 是非常好的选择。 concurrency leveldb skiplist 通过采用">
+<meta name="twitter:image" content="http://yoursite.com/images/skiplist.png">
 
 
 
@@ -119,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/04/21/hello/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/04/23/leveldb-skiplist/"/>
 
 
 
 
 
-  <title>hello | Pifuant's Blog</title>
+  <title>leveldb skiplist | Pifuant's Blog</title>
   
 
 
@@ -232,7 +236,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/21/hello/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/23/leveldb-skiplist/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="pifuant">
@@ -249,7 +253,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">hello</h1>
+          <h1 class="post-title" itemprop="name headline">leveldb skiplist</h1>
         
 
         <div class="post-meta">
@@ -261,8 +265,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-21T05:25:13+08:00">
-                2018-04-21
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-23T16:53:22+08:00">
+                2018-04-23
               </time>
             
 
@@ -299,7 +303,17 @@
       
 
       
-        
+        <h2 id="data-structure"><a href="#data-structure" class="headerlink" title="data structure"></a>data structure</h2><p><img src="/images/skiplist.png" alt="skiplist"></p>
+<p>leveldb memtable需要满足以下几种要求：</p>
+<ul>
+<li>get 足够快  </li>
+<li>write 足够快</li>
+<li>iterator 足够快 (compact to sst file by ordering)</li>
+</ul>
+<p>那么skiplist作为一个同时兼顾list和tree属性的data structure， 是非常好的选择。</p>
+<h2 id="concurrency"><a href="#concurrency" class="headerlink" title="concurrency"></a>concurrency</h2><p><img src="/images/lock.png" alt="concurrency"></p>
+<p>leveldb skiplist 通过采用write lock和memory barrior的方式， 保证读读， 读写操作不会冲突， 提高并发能力。</p>
+
       
     </div>
     
@@ -313,6 +327,12 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/leveldb/" rel="tag"># leveldb</a>
+          
+        </div>
       
 
       
@@ -367,8 +387,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -395,6 +424,15 @@
 
             
 
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
             
 
           </nav>
@@ -430,6 +468,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#data-structure"><span class="nav-number">1.</span> <span class="nav-text">data structure</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#concurrency"><span class="nav-number">2.</span> <span class="nav-text">concurrency</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
