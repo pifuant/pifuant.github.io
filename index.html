@@ -232,6 +232,166 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/24/leveldb-LRUCache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="pifuant">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ant.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Pifuant's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/04/24/leveldb-LRUCache/" itemprop="url">leveldb LRUCache</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T04:29:24+08:00">
+                2018-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/computer-science/" itemprop="url" rel="index">
+                    <span itemprop="name">computer science</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Data-Structure"><a href="#Data-Structure" class="headerlink" title="Data Structure"></a>Data Structure</h2><p><img src="/images/lru.png" alt="LRUCache"></p>
+<p>LRUCache 内部主要数据成员：</p>
+<ul>
+<li>hash table， 一个简单的hash table的实现</li>
+<li>lru list， 一个双向list， 用于存放未被外部使用的entries， 当cache满了后， 再向cache加入新的entry， 需要从这里找出牺牲品。</li>
+<li>in_use list, 一个双向list，用于存放被外部使用的entries</li>
+</ul>
+<p>hash table与双向list相结合， hash table实现快速查找，双向list实现快速add， delete。 </p>
+<p>entry是cache里的数据，要么在lru list中， 要么在in_use list中，通过refs管理生命周期, 通过in_cache标记是否在cache中， 三种情况entry会被从cache中移除:</p>
+<ul>
+<li>Erase()删除</li>
+<li>Insert()加入了相同key的entry， 把原来的替换掉</li>
+<li>cache满了，被牺牲掉</li>
+</ul>
+<p>ShardedLRUCache通过分片， 讲keys映射到多个LRUCache中，增大并发能力。</p>
+<h2 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a>Concurrency</h2><p>mutex保证多线程安全， shard增大并发能力。</p>
+<h2 id="Implementation-Details"><a href="#Implementation-Details" class="headerlink" title="Implementation Details"></a>Implementation Details</h2><p>看到hash table的实现，我在想，为啥hashcode连个扰动函数都不用，基本只会用到hashcode低位去map映射，后面看了ShardedLRUCache， 原来高位负责这里的map映射。 </p>
+<p>其他实现简单易懂。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>几百行的LRUCache的实现， hash table和双向list向结合， reference count， 对于hashcode的合理使用， sharded等各种技术点都有体现， 短小精悍。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/23/leveldb-skiplist/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -436,7 +596,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -447,7 +607,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">1</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
