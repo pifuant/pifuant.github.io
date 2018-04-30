@@ -232,6 +232,153 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/01/leveldb-WriteBatch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="pifuant">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/ant.jpeg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Pifuant's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/01/leveldb-WriteBatch/" itemprop="url">leveldb WriteBatch</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-01T06:41:20+08:00">
+                2018-05-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/computer-science/" itemprop="url" rel="index">
+                    <span itemprop="name">computer science</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// WriteBatch holds a collection of updates to apply atomically to a DB.</span><br><span class="line">//</span><br><span class="line">// The updates are applied in the order in which they are added</span><br><span class="line">// to the WriteBatch.  For example, the value of &quot;key&quot; will be &quot;v3&quot;</span><br><span class="line">// after the following batch is written:</span><br><span class="line">//</span><br><span class="line">//    batch.Put(&quot;key&quot;, &quot;v1&quot;);</span><br><span class="line">//    batch.Delete(&quot;key&quot;);</span><br><span class="line">//    batch.Put(&quot;key&quot;, &quot;v2&quot;);</span><br><span class="line">//    batch.Put(&quot;key&quot;, &quot;v3&quot;);</span><br><span class="line">//</span><br><span class="line">// Multiple threads can invoke const methods on a WriteBatch without</span><br><span class="line">// external synchronization, but if any of the threads may call a</span><br><span class="line">// non-const method, all threads accessing the same WriteBatch must use</span><br><span class="line">// external synchronization.</span><br></pre></td></tr></table></figure>
+<p>doc解释的很清楚了， 重点a collection of updates， 至于保证原子操作， 与db write操作有关， 保证中间不会插入其他update。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// WriteBatchInternal provides static methods for manipulating a</span><br><span class="line">// WriteBatch that we don&apos;t want in the public WriteBatch interface.</span><br></pre></td></tr></table></figure>
+<p>对WriteBatch的操作是由WriteBatchInternal提供的， 比较重点的是InsertInto， 通过这个方法， 会把writebatch里的updates写到memtable里</p>
+<h2 id="Implementation-Details"><a href="#Implementation-Details" class="headerlink" title="Implementation Details"></a>Implementation Details</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// WriteBatch::rep_ :=</span><br><span class="line">//    sequence: fixed64</span><br><span class="line">//    count: fixed32</span><br><span class="line">//    data: record[count]</span><br><span class="line">// record :=</span><br><span class="line">//    kTypeValue varstring varstring         |</span><br><span class="line">//    kTypeDeletion varstring</span><br><span class="line">// varstring :=</span><br><span class="line">//    len: varint32</span><br><span class="line">//    data: uint8[len]</span><br></pre></td></tr></table></figure>
+<p>WriteBatch内部保存updates的格式</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/30/leveldb-memtable/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -751,7 +898,7 @@
               
                 <a href="/archives">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

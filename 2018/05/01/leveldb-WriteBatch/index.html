@@ -79,20 +79,18 @@
 
 
 
-<meta name="description" content="Data Structure LRUCache 内部主要数据成员：  hash table， 一个简单的hash table的实现 lru list， 一个双向list， 用于存放未被外部使用的entries， 当cache满了后， 再向cache加入新的entry， 需要从这里找出牺牲品。 in_use list, 一个双向list，用于存放被外部使用的entries  hash table与双">
+<meta name="description" content="Introduction123456789101112131415// WriteBatch holds a collection of updates to apply atomically to a DB.//// The updates are applied in the order in which they are added// to the WriteBatch.  For exa">
 <meta name="keywords" content="leveldb">
 <meta property="og:type" content="article">
-<meta property="og:title" content="leveldb LRUCache">
-<meta property="og:url" content="http://yoursite.com/2018/04/24/leveldb-LRUCache/index.html">
+<meta property="og:title" content="leveldb WriteBatch">
+<meta property="og:url" content="http://yoursite.com/2018/05/01/leveldb-WriteBatch/index.html">
 <meta property="og:site_name" content="Pifuant&#39;s Blog">
-<meta property="og:description" content="Data Structure LRUCache 内部主要数据成员：  hash table， 一个简单的hash table的实现 lru list， 一个双向list， 用于存放未被外部使用的entries， 当cache满了后， 再向cache加入新的entry， 需要从这里找出牺牲品。 in_use list, 一个双向list，用于存放被外部使用的entries  hash table与双">
+<meta property="og:description" content="Introduction123456789101112131415// WriteBatch holds a collection of updates to apply atomically to a DB.//// The updates are applied in the order in which they are added// to the WriteBatch.  For exa">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/lru.png">
-<meta property="og:updated_time" content="2018-04-24T16:20:49.929Z">
+<meta property="og:updated_time" content="2018-04-30T23:08:17.249Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="leveldb LRUCache">
-<meta name="twitter:description" content="Data Structure LRUCache 内部主要数据成员：  hash table， 一个简单的hash table的实现 lru list， 一个双向list， 用于存放未被外部使用的entries， 当cache满了后， 再向cache加入新的entry， 需要从这里找出牺牲品。 in_use list, 一个双向list，用于存放被外部使用的entries  hash table与双">
-<meta name="twitter:image" content="http://yoursite.com/images/lru.png">
+<meta name="twitter:title" content="leveldb WriteBatch">
+<meta name="twitter:description" content="Introduction123456789101112131415// WriteBatch holds a collection of updates to apply atomically to a DB.//// The updates are applied in the order in which they are added// to the WriteBatch.  For exa">
 
 
 
@@ -122,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/04/24/leveldb-LRUCache/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/05/01/leveldb-WriteBatch/"/>
 
 
 
 
 
-  <title>leveldb LRUCache | Pifuant's Blog</title>
+  <title>leveldb WriteBatch | Pifuant's Blog</title>
   
 
 
@@ -235,7 +233,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/24/leveldb-LRUCache/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/01/leveldb-WriteBatch/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="pifuant">
@@ -252,7 +250,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">leveldb LRUCache</h1>
+          <h1 class="post-title" itemprop="name headline">leveldb WriteBatch</h1>
         
 
         <div class="post-meta">
@@ -264,8 +262,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T04:29:24+08:00">
-                2018-04-24
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-01T06:41:20+08:00">
+                2018-05-01
               </time>
             
 
@@ -324,25 +322,12 @@
       
 
       
-        <h2 id="Data-Structure"><a href="#Data-Structure" class="headerlink" title="Data Structure"></a>Data Structure</h2><p><img src="/images/lru.png" alt="LRUCache"></p>
-<p>LRUCache 内部主要数据成员：</p>
-<ul>
-<li>hash table， 一个简单的hash table的实现</li>
-<li>lru list， 一个双向list， 用于存放未被外部使用的entries， 当cache满了后， 再向cache加入新的entry， 需要从这里找出牺牲品。</li>
-<li>in_use list, 一个双向list，用于存放被外部使用的entries</li>
-</ul>
-<p>hash table与双向list相结合， hash table实现快速查找，双向list实现快速add， delete。 </p>
-<p>entry是cache里的数据，要么在lru list中， 要么在in_use list中，通过refs管理生命周期, 通过in_cache标记是否在cache中， 三种情况entry会被从cache中移除:</p>
-<ul>
-<li>Erase()删除</li>
-<li>Insert()加入了相同key的entry， 把原来的替换掉</li>
-<li>cache满了，被牺牲掉</li>
-</ul>
-<p>ShardedLRUCache通过分片， 讲keys映射到多个LRUCache中，增大并发能力。</p>
-<h2 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a>Concurrency</h2><p>mutex保证多线程安全， shard增大并发能力。</p>
-<h2 id="Implementation-Details"><a href="#Implementation-Details" class="headerlink" title="Implementation Details"></a>Implementation Details</h2><p>看到hash table的实现，我在想，为啥hashcode连个扰动函数都不用，基本只会用到hashcode低位去map映射，后面看了ShardedLRUCache， 原来高位负责这里的map映射。 </p>
-<p>其他实现简单易懂。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>几百行的LRUCache的实现， hash table和双向list向结合， reference count， 对于hashcode的合理使用， sharded等各种技术点都有体现， 短小精悍。</p>
+        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// WriteBatch holds a collection of updates to apply atomically to a DB.</span><br><span class="line">//</span><br><span class="line">// The updates are applied in the order in which they are added</span><br><span class="line">// to the WriteBatch.  For example, the value of &quot;key&quot; will be &quot;v3&quot;</span><br><span class="line">// after the following batch is written:</span><br><span class="line">//</span><br><span class="line">//    batch.Put(&quot;key&quot;, &quot;v1&quot;);</span><br><span class="line">//    batch.Delete(&quot;key&quot;);</span><br><span class="line">//    batch.Put(&quot;key&quot;, &quot;v2&quot;);</span><br><span class="line">//    batch.Put(&quot;key&quot;, &quot;v3&quot;);</span><br><span class="line">//</span><br><span class="line">// Multiple threads can invoke const methods on a WriteBatch without</span><br><span class="line">// external synchronization, but if any of the threads may call a</span><br><span class="line">// non-const method, all threads accessing the same WriteBatch must use</span><br><span class="line">// external synchronization.</span><br></pre></td></tr></table></figure>
+<p>doc解释的很清楚了， 重点a collection of updates， 至于保证原子操作， 与db write操作有关， 保证中间不会插入其他update。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// WriteBatchInternal provides static methods for manipulating a</span><br><span class="line">// WriteBatch that we don&apos;t want in the public WriteBatch interface.</span><br></pre></td></tr></table></figure>
+<p>对WriteBatch的操作是由WriteBatchInternal提供的， 比较重点的是InsertInto， 通过这个方法， 会把writebatch里的updates写到memtable里</p>
+<h2 id="Implementation-Details"><a href="#Implementation-Details" class="headerlink" title="Implementation Details"></a>Implementation Details</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// WriteBatch::rep_ :=</span><br><span class="line">//    sequence: fixed64</span><br><span class="line">//    count: fixed32</span><br><span class="line">//    data: record[count]</span><br><span class="line">// record :=</span><br><span class="line">//    kTypeValue varstring varstring         |</span><br><span class="line">//    kTypeDeletion varstring</span><br><span class="line">// varstring :=</span><br><span class="line">//    len: varint32</span><br><span class="line">//    data: uint8[len]</span><br></pre></td></tr></table></figure>
+<p>WriteBatch内部保存updates的格式</p>
 
       
     </div>
@@ -373,8 +358,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/04/23/leveldb-skiplist/" rel="next" title="leveldb skiplist">
-                <i class="fa fa-chevron-left"></i> leveldb skiplist
+              <a href="/2018/04/30/leveldb-memtable/" rel="next" title="leveldb memtable">
+                <i class="fa fa-chevron-left"></i> leveldb memtable
               </a>
             
           </div>
@@ -382,10 +367,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/04/30/leveldb-memtable/" rel="prev" title="leveldb memtable">
-                leveldb memtable <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -537,7 +518,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Structure"><span class="nav-number">1.</span> <span class="nav-text">Data Structure</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Concurrency"><span class="nav-number">2.</span> <span class="nav-text">Concurrency</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implementation-Details"><span class="nav-number">3.</span> <span class="nav-text">Implementation Details</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implementation-Details"><span class="nav-number">2.</span> <span class="nav-text">Implementation Details</span></a></li></ol></div>
             
 
           </div>
