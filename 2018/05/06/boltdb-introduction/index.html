@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="leveldb," />
+  <meta name="keywords" content="boltdb," />
 
 
 
@@ -79,20 +79,18 @@
 
 
 
-<meta name="description" content="IntroductionMemtable 提供了NewIterator, Get支持read操作， Add支持write操作， Ref/Unref支持reference count Implementation Detailsentry format entry compared order by:  increasing user key (according to user-supplied">
-<meta name="keywords" content="leveldb">
+<meta name="description" content="boltdb是一个设计简单， go实现的kv数据库， 代码量虽少， 但是功能五脏俱全， 而且性能不错， 如果打算学习下kv storage engine, boltdb绝对是一个好的开始。 boltdb的所有数据都存储在一个单文件里，mmap映射到内存，以page作为基本数据操作单位， page主要有meta(元数据)， freelist(可使用的page）， branch（index）, lea">
+<meta name="keywords" content="boltdb">
 <meta property="og:type" content="article">
-<meta property="og:title" content="leveldb memtable">
-<meta property="og:url" content="http://yoursite.com/2018/04/30/leveldb-memtable/index.html">
+<meta property="og:title" content="boltdb introduction">
+<meta property="og:url" content="http://yoursite.com/2018/05/06/boltdb-introduction/index.html">
 <meta property="og:site_name" content="Pifuant&#39;s Blog">
-<meta property="og:description" content="IntroductionMemtable 提供了NewIterator, Get支持read操作， Add支持write操作， Ref/Unref支持reference count Implementation Detailsentry format entry compared order by:  increasing user key (according to user-supplied">
+<meta property="og:description" content="boltdb是一个设计简单， go实现的kv数据库， 代码量虽少， 但是功能五脏俱全， 而且性能不错， 如果打算学习下kv storage engine, boltdb绝对是一个好的开始。 boltdb的所有数据都存储在一个单文件里，mmap映射到内存，以page作为基本数据操作单位， page主要有meta(元数据)， freelist(可使用的page）， branch（index）, lea">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://yoursite.com/images/entry.png">
-<meta property="og:updated_time" content="2018-04-30T22:42:38.445Z">
+<meta property="og:updated_time" content="2018-05-06T11:43:59.073Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="leveldb memtable">
-<meta name="twitter:description" content="IntroductionMemtable 提供了NewIterator, Get支持read操作， Add支持write操作， Ref/Unref支持reference count Implementation Detailsentry format entry compared order by:  increasing user key (according to user-supplied">
-<meta name="twitter:image" content="http://yoursite.com/images/entry.png">
+<meta name="twitter:title" content="boltdb introduction">
+<meta name="twitter:description" content="boltdb是一个设计简单， go实现的kv数据库， 代码量虽少， 但是功能五脏俱全， 而且性能不错， 如果打算学习下kv storage engine, boltdb绝对是一个好的开始。 boltdb的所有数据都存储在一个单文件里，mmap映射到内存，以page作为基本数据操作单位， page主要有meta(元数据)， freelist(可使用的page）， branch（index）, lea">
 
 
 
@@ -122,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/04/30/leveldb-memtable/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/05/06/boltdb-introduction/"/>
 
 
 
 
 
-  <title>leveldb memtable | Pifuant's Blog</title>
+  <title>boltdb introduction | Pifuant's Blog</title>
   
 
 
@@ -235,7 +233,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/30/leveldb-memtable/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/06/boltdb-introduction/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="pifuant">
@@ -252,7 +250,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">leveldb memtable</h1>
+          <h1 class="post-title" itemprop="name headline">boltdb introduction</h1>
         
 
         <div class="post-meta">
@@ -264,8 +262,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-30T21:15:17+08:00">
-                2018-04-30
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-06T18:35:10+08:00">
+                2018-05-06
               </time>
             
 
@@ -324,19 +322,8 @@
       
 
       
-        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Memtable 提供了NewIterator, Get支持read操作， Add支持write操作， Ref/Unref支持reference count</p>
-<h2 id="Implementation-Details"><a href="#Implementation-Details" class="headerlink" title="Implementation Details"></a>Implementation Details</h2><h3 id="entry-format"><a href="#entry-format" class="headerlink" title="entry format"></a>entry format</h3><p><img src="/images/entry.png" alt="entry"></p>
-<p>entry compared order by:</p>
-<ul>
-<li>increasing user key (according to user-supplied comparator)</li>
-<li>decreasing sequence number</li>
-<li>decreasing type (though sequence# should be enough to disambiguate)</li>
-</ul>
-<h3 id="Add"><a href="#Add" class="headerlink" title="Add"></a>Add</h3><p>将key, value, sequence number, value type组合成entry, 然后insert到skiplist</p>
-<h3 id="Get"><a href="#Get" class="headerlink" title="Get"></a>Get</h3><p>通过Skiplist::Seek找到entry， 然后判断entry里的user key是否匹配， sequence number降序排列， 这里就不需要判断了， 最后判断value type是否是kTypeValue。</p>
-<h3 id="Iterator"><a href="#Iterator" class="headerlink" title="Iterator"></a>Iterator</h3><p>Memtable::Iterator 通过调用Skiplist::Iterator对应方法实现</p>
-<h3 id="Concurrency"><a href="#Concurrency" class="headerlink" title="Concurrency"></a>Concurrency</h3><p>Memtable并没有为skiplist提供write mutex，需要外部保证。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Memtable提供了非常简单的接口，在leveldb中是非常重要的数据结构。</p>
+        <p>boltdb是一个设计简单， go实现的kv数据库， 代码量虽少， 但是功能五脏俱全， 而且性能不错， 如果打算学习下kv storage engine, boltdb绝对是一个好的开始。</p>
+<p>boltdb的所有数据都存储在一个单文件里，mmap映射到内存，以page作为基本数据操作单位， page主要有meta(元数据)， freelist(可使用的page）， branch（index）, leaf（data）四种， 数据是以b+ tree组织的，通过cow实现mvcc，即当发生写事务时， 会把整个路径的对于page的修改写到新的page里，那些old page当没有读事务关联时， 就会有freelist回收再利用， 读事务时间不能太长， 不然会用太多的old page在内存， meta page有两个， 当初始化事务时， 会关联txid最大且有效的， 当当写事务要写会到page时， 会写到txid较小的那个， 及时写时失败， 也总有一个有效的meta page， 以此保证读事务总是可以在任何时候读到最新的commit数。， 写事务是相互阻塞的， 同时只有一个写事务存在， 这样对于事务的维护非常简单，  但是写事务的性能不高。 由于数据的存储依赖mmap， 当数据足够大时，由于os的换页操作， 读性能也会严重下降。</p>
 
       
     </div>
@@ -354,7 +341,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/leveldb/" rel="tag"># leveldb</a>
+            <a href="/tags/boltdb/" rel="tag"># boltdb</a>
           
         </div>
       
@@ -367,8 +354,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/04/24/leveldb-LRUCache/" rel="next" title="leveldb LRUCache">
-                <i class="fa fa-chevron-left"></i> leveldb LRUCache
+              <a href="/2018/05/01/skiplist-分段锁/" rel="next" title="skiplist 分段锁">
+                <i class="fa fa-chevron-left"></i> skiplist 分段锁
               </a>
             
           </div>
@@ -376,10 +363,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/05/01/leveldb-WriteBatch/" rel="prev" title="leveldb WriteBatch">
-                leveldb WriteBatch <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -431,17 +414,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            文章目录
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            站点概览
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -521,22 +495,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Implementation-Details"><span class="nav-number">2.</span> <span class="nav-text">Implementation Details</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#entry-format"><span class="nav-number">2.1.</span> <span class="nav-text">entry format</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Add"><span class="nav-number">2.2.</span> <span class="nav-text">Add</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Get"><span class="nav-number">2.3.</span> <span class="nav-text">Get</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Iterator"><span class="nav-number">2.4.</span> <span class="nav-text">Iterator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Concurrency"><span class="nav-number">2.5.</span> <span class="nav-text">Concurrency</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
